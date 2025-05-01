@@ -1,0 +1,27 @@
+/* css初始化 */
+*{
+    margin: 0;
+    padding: 0;
+}
+ul{
+    list-style: none;
+}
+a{
+    text-decoration: none;
+}
+img{
+    vertical-align: middle;
+}
+
+/* 适配pixel7屏幕大小 */
+html{
+    font-size: 13.333333vw;
+}
+@media(min-width: 412px) {
+    html{
+        font-size: 100px;
+    }
+}
+body{
+    font-size: 12px;
+}
