@@ -1,9 +1,11 @@
 //项目路由配置
 import Home from '../pages/home/Home'
-// import Login from '../pages/login/Login'
+import Login from '../pages/login/Login'
 import Mynotes from '../pages/mynotes/Mynotes'
 import Publish from '../pages/publish/Publish.jsx'
 import Layout from '../pages/Layout.jsx'
+import Details from "../pages/details/Details";
+
 const routes = [
     {
         path:'/',
@@ -13,10 +15,10 @@ const routes = [
                 path:'/',
                 element:<Home/>,
             },
-            // {
-            //     path:'/login',
-            //     element:<Login/>,
-            // },
+            {
+                path:'/login',
+                element:<Login/>,
+            },
             {
                 path:'/mynotes',
                 element:<Mynotes/>,
@@ -24,6 +26,10 @@ const routes = [
             {
                 path:'/publish',
                 element:<Publish/>,
+            },
+            {
+                path:'/details',
+                element:<Details/>
             }
         ]        
     }
