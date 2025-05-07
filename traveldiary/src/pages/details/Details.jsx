@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar, Image, ImageViewer, List, Button, Toast, Input } from 'antd-mobile';
 import { MessageFill, HeartOutline, HeartFill, LeftOutline } from 'antd-mobile-icons'
-
+import { FaShare } from 'react-icons/fa';
 
 // Mock数据
 const detailData = {
@@ -11,7 +11,7 @@ const detailData = {
     avatar: 'https://picsum.photos/50',
     nickname: '旅行达人小王'
   },
-  content: '这是一篇详细的游记内容，包含美丽的风景描述和旅行建议...',
+  content: '这是一篇详细的游记内容，包含美丽的风景描述和旅行建议...6666666666666666666666666666',
   media: [
     { type: 'video', url: 'https://example.com/video.mp4' },
     { type: 'image', url: 'https://picsum.photos/300/400' },
@@ -123,14 +123,17 @@ export default function Details() {
 
 
           {/* 分享功能需完善 */}
-          <Button shape='rounded' onClick={() => Toast.show('还没做')}>
+          <Button shape = "rectangular"
+            onClick={() => Toast.show('还没做')}>
+             <FaShare size={24} color="#333" />
              分享
           </Button>
+
 
           
           <Input
             style={styles.commentInput}
-            placeholder='输入评论'
+            placeholder='分享你的看法'
             value={commentText}
             onChange={setCommentText}
             onEnterPress={handleComment}
