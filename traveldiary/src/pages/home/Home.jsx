@@ -42,22 +42,22 @@ const notes=[
           style={{
             backgroundColor:"#FFFFFF",
             padding:"0.2rem 1rem",
-            position:"fixed",top:0,left:0,right:0,
+            position:"fixed",top:0,left:0,right:0,bottom:0,
             '--border-radius': '100px',
           }}
         />
         </div>
         <div style={{
           position: "fixed",
+          top:"0.8rem",
           width: "100%",
-          backgroundColor: "#FFFFFF",
-          
+          backgroundColor: "#FFFFFF",  
           boxShadow: "0 8px 8px rgba(0, 0, 0, 0.1)", // 添加阴影
         }}>
         <Tabs style={{backgroundColor:"#FFFFFF"}}>
-          <Tabs.Tab title='推荐' key='recommended'></Tabs.Tab>
+          <Tabs.Tab title='发现' key='recommended'></Tabs.Tab>
           <Tabs.Tab title='热门' key='trending'></Tabs.Tab>
-          <Tabs.Tab title='同城' key='nearest'></Tabs.Tab>
+          <Tabs.Tab title='最新' key='nearest'></Tabs.Tab>
         </Tabs>
         </div>
         <div style={{
