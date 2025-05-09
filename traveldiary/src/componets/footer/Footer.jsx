@@ -15,7 +15,7 @@ export default function Footer(){
 
 const [actived,setActive]=useState(window.location.pathname);
 const location = useLocation()
-const hiddenPaths = ['/login', '/details']
+const hiddenPaths = ['/login', '/details', '/register']
 
 const navigate=useNavigate();
 

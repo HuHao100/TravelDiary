@@ -46,6 +46,14 @@ export default function Details() {
   const handleLike = () => {
     setLiked(!liked);
     setLikeCount(prev => liked ? prev - 1 : prev + 1);
+    // 添加动画效果
+    if (!liked) {
+      const likeBtn = document.querySelector('.like-button');
+      likeBtn.style.transform = 'scale(1.2)';
+      setTimeout(() => {
+        likeBtn.style.transform = 'scale(1)';
+      }, 200);
+    }
   };
 
   // 提交评论
@@ -77,7 +85,7 @@ export default function Details() {
     <div style={styles.container}>
       {/* 导航栏 */}
       <NavBar
-        left={<LeftOutline fontSize={20} />}
+        backArrow={<LeftOutline fontSize={20} />} // 仅设置图标样式
         onBack={() => navigate('/')}
         style={styles.navBar}
       />
@@ -112,32 +120,46 @@ export default function Details() {
         {/* 互动操作 */}
         <div style={styles.actions}>
 
-          <Button shape='rounded' onClick={handleLike}>
-            {liked ? <HeartFill color='var(--adm-color-danger)' /> : <HeartOutline />}
-            {likeCount}
+          {/* 点赞按钮 */}
+          <Button 
+            shape='rounded' 
+            onClick={handleLike}
+            className="like-button"
+            style={styles.actionButton}
+          >
+            <HeartFill color={liked ? 'var(--adm-color-danger)' : undefined} />
+            <span style={{ marginLeft: 4 }}>{likeCount}</span>
           </Button>
 
-          <Button shape='rounded'>
-            <MessageFill /> {comments.length}
+          {/* 评论按钮 */}
+          <Button 
+            shape='rounded'
+            style={styles.actionButton}
+          >
+            <MessageFill />
+            <span style={{ marginLeft: 4 }}>{comments.length}</span>
           </Button>
 
 
-          {/* 分享功能需完善 */}
-          <Button shape = "rectangular"
-            onClick={() => Toast.show('还没做')}>
-             <FaShare size={24} color="#333" />
-             分享
+          {/* 分享按钮 */}
+          <Button 
+            shape='rounded'
+            onClick={() => Toast.show('分享功能暂未实现')}
+            style={styles.actionButton}
+          >
+            <FaShare size={20} color="#333" />
           </Button>
 
-
-          
-          <Input
-            style={styles.commentInput}
-            placeholder='分享你的看法'
-            value={commentText}
-            onChange={setCommentText}
-            onEnterPress={handleComment}
-          />
+          {/* 书写评论框 */}
+          <div style={styles.commentSection}>
+            <Input
+              style={styles.commentInput}
+              placeholder='写个评论走个心'
+              value={commentText}
+              onChange={setCommentText}
+              onEnterPress={handleComment}
+            />
+          </div>
         </div>
 
         {/* 评论列表 */}
@@ -165,14 +187,25 @@ export default function Details() {
   );
 }
 
+const colors = {
+  primary: '#4CAF50', // 自然绿
+  secondary: '#FF9800', // 活力橙
+  background: '#F5F5F5',
+  textPrimary: '#2E2E2E',
+  textSecondary: '#757575'
+};
+
 const styles = {
   container: {
+    backgroundColor: colors.background,
     height: '100vh',
     overflow: 'auto',
     backgroundColor: '#fff'
   },
   navBar: {
     '--height': '45px',
+    '--background-color': `linear-gradient(135deg, ${colors.primary} 0%,rgb(21, 44, 220) 100%)`,
+    '--color': 'white',
     position: 'sticky',
     top: 0,
     zIndex: 100
@@ -183,7 +216,9 @@ const styles = {
   authorInfo: {
     display: 'flex',
     alignItems: 'center',
-    padding: '12px 0'
+    padding: '16px 0',
+    borderBottom: `1px solid ${colors.primary}20`,
+    marginBottom: 16
   },
   avatar: {
     width: 50,
@@ -199,14 +234,20 @@ const styles = {
     height: '300px',
     overflowX: 'auto',
     whiteSpace: 'nowrap',
-    marginBottom: 12
+    marginBottom: 16,
+    borderRadius: 16,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
   },
   mediaItem: {
     display: 'inline-block',
-    width: '100%',
+    width: '85%',
     height: 300,
     position: 'relative',
-    marginRight: 12
+    marginRight: 12,
+    transition: 'transform 0.3s ease',
+    ':hover': {
+      transform: 'scale(0.98)'
+    }
   },
   media: {
     width: '100%',
@@ -225,22 +266,59 @@ const styles = {
     zIndex: 10
   },
   textContent: {
-    lineHeight: 1.6,
-    marginBottom: 16
+    lineHeight: 1.8,
+    fontSize: 16,
+    color: colors.textPrimary,
+    padding: 16,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
   },
   actions: {
     display: 'flex',
-    gap: 8,
-    marginBottom: 16
+    gap: 12,
+    marginBottom: 16,
+    alignItems: 'center'
   },
   commentInput: {
     flex: 1,
     '--padding-left': '12px',
-    marginLeft: 'auto'
+    transition: 'all 0.3s ease',
+    '&:focus-within': {
+      transform: 'scale(1.02)',
+      boxShadow: `0 0 0 2px ${colors.primary}20`
+    }
   },
   commentAvatar: {
     width: 30,
     height: 30,
     borderRadius: '50%'
+  },
+  actionButton: {
+    '--background-color': 'rgba(255,255,255,0.9)',
+    '--border-color': colors.primary,
+    '--text-color': colors.textPrimary,
+    '--border-radius': '20px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+    padding: '8px 16px',
+    fontSize: '14px',
+    width: '100px', // 统一宽度
+    height: '40px', // 统一高度
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  commentSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 16
+  },
+  submitButton: {
+    '--background-color': colors.primary,
+    '--text-color': '#fff',
+    '--border-radius': '20px',
+    padding: '8px 16px',
+    fontSize: '14px'
   }
 };
