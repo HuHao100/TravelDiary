@@ -2,6 +2,7 @@
 
 # dependencies
 traveldiary/node_modules
+traveldiary-backend/node_modules
 /.pnp
 .pnp.js
 
