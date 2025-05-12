@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Breadcrumb, Layout, Menu, List, Tag, Select, Input, Pagination, Drawer, Button,Avatar } from "antd";
+import { Breadcrumb, Layout, Menu, List, Tag, Select, Input, Pagination, Drawer, Button, Avatar } from "antd";
 import { useNavigate } from "react-router-dom"; // 用于页面跳转
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
@@ -30,37 +30,56 @@ const data = [
     id: 3,
     title: "游记标题3",
     author: { name: "用户3", avatar: "/avatar.jpg" },
-    content: "这是正文内容的一部分，展示一些摘要信息...",
+    content: "这是正文内容的一部分，展示一些摘要信息...111111111111111111111111",
     cover: "/cover.png",
     status: "已通过",
     publishTime: "2025-05-08 16:45",
     video: "/video.mp4",
   },
+  {
+    id: 4,
+    title: "游记标题4",
+    author: { name: "用户1", avatar: "/avatar.jpg" },
+    content: "这是正文内容的一部分，展示一些摘要信息...",
+    cover: "/cover.png",
+    status: "待审核",
+    publishTime: "2025-05-10 14:30",
+    video: "/video.mp4",
+  },
+  {
+    id: 5,
+    title: "游记标题5",
+    author: { name: "用户1", avatar: "/avatar.jpg" },
+    content: "这是正文内容的一部分，展示一些摘要信息...",
+    cover: "/cover.png",
+    status: "待审核",
+    publishTime: "2025-05-10 14:30",
+    video: "/video.mp4",
+  },
 ];
 
 export default function Home() {
-  const [filterStatus, setFilterStatus] = useState("all"); // 筛选状态
-  const [selectedMenu, setSelectedMenu] = useState("1"); // 当前选中的菜单项
-  const [drawerVisible, setDrawerVisible] = useState(false); // 抽屉显示状态
-  const navigate = useNavigate(); // 用于页面跳转
+  const user = JSON.parse(localStorage.getItem("user")); // 获取登录用户信息
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedMenu, setSelectedMenu] = useState("1");
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const navigate = useNavigate();
 
-  // 菜单切换时重置筛选状态
   const handleMenuClick = (e) => {
     setSelectedMenu(e.key);
     if (e.key === "2") {
-      setFilterStatus("all"); // 重置筛选状态为 "全部"
+      setFilterStatus("all");
     }
   };
 
-  // 筛选后的数据
   const filteredData = data.filter((item) => {
     if (selectedMenu === "1") {
-      // 待审核菜单
       return item.status === "待审核";
     } else if (selectedMenu === "2") {
-      // 已审核菜单
       if (filterStatus === "all") return item.status !== "待审核";
       return item.status === filterStatus;
+    } else if (selectedMenu === "3" && user.role === "管理员") {
+      return item.status === "回收站";
     }
     return false;
   });
@@ -72,29 +91,29 @@ export default function Home() {
           theme="light"
           mode="horizontal"
           defaultSelectedKeys={["1"]}
-          onClick={handleMenuClick} // 使用新的菜单点击处理函数
+          onClick={handleMenuClick}
           items={[
             { key: "1", label: "待审核" },
             { key: "2", label: "已审核" },
-            { key: "3", label: "回收站" },
+            ...(user.role === "管理员" ? [{ key: "3", label: "回收站" }] : []), // 管理员显示回收站
           ]}
           style={{ flex: 1, minWidth: 0 }}
         />
         <Avatar
           src="/avatar.jpg"
           style={{ cursor: "pointer" }}
-          onClick={() => setDrawerVisible(true)} // 点击头像显示抽屉
+          onClick={() => setDrawerVisible(true)}
         />
       </Header>
       <Content style={{ padding: "0 48px" }}>
         <Breadcrumb style={{ margin: "20px 0", marginLeft: "20px" }}>
           <Breadcrumb.Item>审核列表</Breadcrumb.Item>
-          <Breadcrumb.Item>{selectedMenu === "1" ? "待审核" : "已审核"}</Breadcrumb.Item>
+          <Breadcrumb.Item>{selectedMenu === "1" ? "待审核" : selectedMenu === "2" ? "已审核" : "回收站"}</Breadcrumb.Item>
         </Breadcrumb>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 20 }}>
           {selectedMenu === "2" && (
             <Select
-              value={filterStatus} // 确保筛选器的显示值与状态同步
+              value={filterStatus}
               style={{ width: "10%", marginRight: 10 }}
               onChange={(value) => setFilterStatus(value)}
             >
@@ -114,21 +133,46 @@ export default function Home() {
         </div>
         <div style={{ margin: 20, minHeight: 380, background: "#fff", borderRadius: "8px", padding: 20 }}>
           <List
-            itemLayout="vertical"
+            itemLayout="horizontal"
             dataSource={filteredData}
-            renderItem={(item,index) => (
+            renderItem={(item, index) => (
               <List.Item
                 key={item.id}
-                extra={<img width={100} alt="cover" src={item.cover} />}
-                onClick={() => navigate(`/details/${item.id}`, { state: { item, allItems: data, currentIndex: index } })} // 跳转到详情页面并传递数据
-                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/details/${item.id}`, { state: { item, allItems: filteredData, currentIndex: index } })}
+                style={{ cursor: "pointer", alignItems: "center" }}
               >
-                <List.Item.Meta
-                  title={<a href="#">{item.title}</a>}
-                  description={`发布时间: ${item.publishTime}`}
-                />
-                <div>{item.content}</div>
-                <Tag color={item.status === "待审核" ? "blue" : item.status === "不通过" ? "red" : "green"}>{item.status}</Tag>
+                <div style={{ marginRight: 20 }}>
+                  <img
+                    src={item.cover}
+                    alt="cover"
+                    style={{
+                      width: 100,
+                      height: 100,
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>{item.title}</h3>
+                  <p style={{ margin: "8px 0", color: "#666", fontSize: "14px", lineHeight: "1.5" }}>
+                    {item.content}
+                  </p>
+                  <p style={{ margin: 0, fontSize: "12px", color: "#999" }}>
+                    <strong>发布时间：</strong> {item.publishTime}
+                  </p>
+                </div>
+                <Tag
+                  color={item.status === "待审核" ? "blue" : item.status === "不通过" ? "red" : "green"}
+                  style={{
+                    marginLeft: 20,
+                    fontSize: "16px",
+                    padding: "5px 10px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  {item.status}
+                </Tag>
               </List.Item>
             )}
           />
@@ -138,8 +182,6 @@ export default function Home() {
         </div>
       </Content>
       <Footer style={{ textAlign: "center" }}>{new Date().getFullYear()}@jierwusha</Footer>
-
-      {/* 抽屉 */}
       <Drawer
         title="用户信息"
         placement="right"
@@ -148,9 +190,17 @@ export default function Home() {
       >
         <div style={{ textAlign: "center" }}>
           <Avatar src="/avatar.jpg" size={64} />
-          <h3 style={{ marginTop: 10 }}>用户1</h3>
-          <p>当前角色：审核员</p>
-          <Button type="primary" danger style={{ marginTop: 10 }} onClick={() => alert("退出系统")}>
+          <h3 style={{ marginTop: 10 }}>{user.name}</h3>
+          <p>当前角色：{user.role}</p>
+          <Button
+            type="primary"
+            danger
+            style={{ marginTop: 10 }}
+            onClick={() => {
+              localStorage.removeItem("user"); // 清除本地存储的用户信息
+              navigate("/login"); // 跳转到登录页面
+            }}
+          >
             退出系统
           </Button>
         </div>
