@@ -10,18 +10,22 @@ export default function Login() {
 
   const handleLogin = () => {
     const user = users.find((u) => u.username === username && u.password === password);
-
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user)); // 存储用户信息到本地
+      console.log("用户存在", user);
+      localStorage.setItem("user", JSON.stringify(user)); 
+      console.log("本地存储",localStorage.getItem("user")); // 存储用户信息到本地
+      // 存储用户信息到本地
+      
       message.success("登录成功！");
-      navigate("/"); // 跳转到首页
+      console.log("准备跳转");
+      navigate("/");
+       // 跳转到首页
     } else {
       message.error("用户名或密码错误！");
     }
   };
 
   return (
-    
     <div style={{ display: "flex",flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh", backgroundColor: "#f0f2f5" }}>
          <h1 style={{ marginBottom: "20px", fontSize: "24px", fontWeight: "bold", color: "#333" }}>
         欢迎使用旅游日记审核平台
