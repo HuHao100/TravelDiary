@@ -16,11 +16,10 @@ img{
 /* 适配pixel7屏幕大小 */
 html{
     font-size: 13.333333vw;
-    background-color: #F2F3F5;
 }
 @media(min-width: 412px) {
     html{
-        font-size: 60px;
+        font-size: 100px;
     }
 }
 body{

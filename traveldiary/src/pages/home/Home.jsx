@@ -1,29 +1,40 @@
-import React from "react";
-import {SearchBar} from "antd-mobile";
-import  {Tabs}  from "antd-mobile";
+import React, { useEffect, useState } from "react";
+import { SearchBar, Tabs, Toast } from "antd-mobile";
+import { useNavigate } from "react-router-dom";
 import NoteCard from "../../components/notecard/Notecard";
+import axios from "axios";
+import API_BASE_URL from "../../config";
 
 export default function Home() {
-const notes=[
-  {
-    title: "游记标题1",
-    username: "用户1",
-    cover:"/cover.png",
-    avatar: "/images.jpg",
-  },
-  {
-    title: "游记标题2",
-    username: "用户2",
-    cover:"/cover.png",
-    avatar: "/images.jpg",
-  },
-  {
-    title: "游记标题3",
-    username: "用户3",
-    cover:"/cover.png",
-    avatar: "/images.jpg",
-  }
-]
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchDiaries = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/diaries/getAll`);
+        const formattedData = response.data.map(item => ({
+          id: item.id,
+          title: item.title,
+          cover: item.image_url,
+          username: item.user.nickname,
+          avatar: item.user.avatar_url
+        }));
+        setNotes(formattedData);
+      } catch (error) {
+        Toast.show({
+          content: '加载游记失败',
+          position: 'bottom'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDiaries();
+  }, []);
+
   return (
     <div>
         <div
@@ -60,6 +71,7 @@ const notes=[
           <Tabs.Tab title='最新' key='nearest'></Tabs.Tab>
         </Tabs>
         </div>
+
         <div style={{
         marginTop: '0.8rem',
         columnCount: 2,
@@ -67,9 +79,19 @@ const notes=[
         padding: '0.1rem',
         marginBottom: '1rem',
       }}>
-        {notes.map((note, index) => (
-          <NoteCard key={index} {...note} />
-        ))}
+
+      {loading ? (
+          <div style={{ textAlign: 'center', padding: '1rem' }}>加载中...</div>
+        ) : notes.map((note) => (
+          <NoteCard
+            key={note.id}
+            title={note.title}
+            username={note.username}
+            cover={`${API_BASE_URL}${note.cover}`}
+            avatar={`${API_BASE_URL}${note.avatar}`}
+            onClick={() => navigate(`/details/${note.id}`)} 
+          />
+      ))}
       </div>
     </div>
   );

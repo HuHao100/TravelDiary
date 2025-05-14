@@ -17,10 +17,6 @@ DiaryComment.belongsTo(Diary, { foreignKey: 'diary_id' });
 User.hasMany(DiaryComment, { foreignKey: 'user_id' });
 DiaryComment.belongsTo(User, { foreignKey: 'user_id' });
 
-// 评论的父子关系
-DiaryComment.hasMany(DiaryComment, { as: 'Replies', foreignKey: 'parent_id' });
-DiaryComment.belongsTo(DiaryComment, { as: 'Parent', foreignKey: 'parent_id' });
-
 // 日记与图片
 Diary.hasMany(DiaryImage, { foreignKey: 'diary_id' });
 DiaryImage.belongsTo(Diary, { foreignKey: 'diary_id' });
