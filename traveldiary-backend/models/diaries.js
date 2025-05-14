@@ -6,8 +6,9 @@ const Diary = sequelize.define('Diary', {
   user_id: { type: DataTypes.INTEGER, allowNull: false },
   title: { type: DataTypes.STRING(100), allowNull: false },
   content: { type: DataTypes.TEXT, allowNull: false },
-  status: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), defaultValue: 'pending' },
+  status: { type: DataTypes.ENUM('pending', 'approved', 'rejected','deleted'), defaultValue: 'pending' },
   rejection_reason: { type: DataTypes.STRING(255) },
+  // is_deleted: { type: DataTypes.BOOLEAN, defaultValue: false },
   created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, {

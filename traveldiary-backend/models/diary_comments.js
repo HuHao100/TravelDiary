@@ -6,6 +6,7 @@ const DiaryComment = sequelize.define('DiaryComment', {
   diary_id: { type: DataTypes.INTEGER, allowNull: false },
   user_id: { type: DataTypes.INTEGER, allowNull: false },
   content: { type: DataTypes.TEXT, allowNull: false },
+  // parent_id: { type: DataTypes.INTEGER, allowNull: true },
   created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, {
   tableName: 'diary_comments',

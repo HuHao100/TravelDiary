@@ -1,59 +1,20 @@
 const express = require('express');
-const sequelize = require('../config/db');
-const { Op } = require('sequelize');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const { Diary, User, DiaryImage, DiaryVideo, DiaryComment, DiaryLike } = require('../models');
-
-// 获取当前用户日记
-router.get('/getMy', async (req, res) => {
-  try {
-    const diaries = await Diary.findAll({
-      where: { 
-        status: { 
-          [Op.ne]: 'deleted'
-        } 
-      },
-        include: [{
-          model: DiaryImage,
-          attributes: ['image_url'],
-          limit: 1, // 只取第一张图片
-          required: false // 允许无图片
-        }],
-        order: [['created_at', 'DESC']]
-    });
-
-    // 格式化返回数据
-    const formatted = diaries.map(diary => ({
-      id: diary.id,
-      user_id: diary.user_id,
-      title: diary.title,
-      content: diary.content,
-      status: diary.status,
-      reject_reason: diary.rejection_reason,
-
-      image_url: diary.DiaryImages[0]?.image_url
-      ? `${diary.DiaryImages[0].image_url}` // 添加完整路径前缀
-      : '/diary_images/default.png', // 直接返回默认图路径
-
-      created_at: diary.created_at
-    }));
-
-    res.json(formatted);
-  } catch (err) {
-    res.status(500).json({ error: '获取游记失败' });
-  }
-});
+const { Diary } = require('../models');
+const { DiaryImage } = require('../models');
+const { Op } = require('sequelize');
+const { User } = require('../models');
+const { DiaryVideo } = require('../models');
+const { DiaryComment } = require('../models');
+const { DiaryLike } = require('../models'); // Added DiaryLike import
 
 // 获取所有日记
 router.get('/getAll', async (req, res) => {
   try {
     const diaries = await Diary.findAll({
       where: { 
-        status: {
-          [Op.notIn]: ['deleted', 'rejected']
+        status: { 
+          [Op.ne]: 'deleted'
         } 
       },
       include: [
@@ -74,7 +35,51 @@ router.get('/getAll', async (req, res) => {
 
     const formatted = diaries.map(diary => ({
       id: diary.id,
-      user_id: diary.User.id, 
+      user_id: diary.User.id, // 添加user_id字段
+      title: diary.title,
+      content: diary.content, // 添加content字段
+      status: diary.status,
+      image_url: diary.DiaryImages[0]?.image_url 
+        ? `${diary.DiaryImages[0].image_url}`
+        : '/diary_images/default.png',
+      user: {
+        nickname: diary.User.nickname,
+        avatar_url: `${diary.User.avatar_url}`
+      },
+      created_at: diary.created_at // 添加创建时间
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '获取游记失败' });
+  }
+});
+router.get('/getDeleted', async (req, res) => {
+  try {
+    const diaries = await Diary.findAll({
+      where: { 
+        status: 'deleted'
+      },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'nickname', 'avatar_url'],
+          required: true
+        },
+        {
+          model: DiaryImage,
+          attributes: ['image_url'],
+          limit: 1,
+          required: false
+        }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+
+    const formatted = diaries.map(diary => ({
+      id: diary.id,
+      user_id: diary.User.id,
       title: diary.title,
       content: diary.content,
       status: diary.status,
@@ -84,16 +89,16 @@ router.get('/getAll', async (req, res) => {
       user: {
         nickname: diary.User.nickname,
         avatar_url: `${diary.User.avatar_url}`
-      }
+      },
+      created_at: diary.created_at
     }));
 
     res.json(formatted);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: '获取游记失败' });
+    res.status(500).json({ error: '获取已删除游记失败' });
   }
 });
-
 // 获取单个日记详情
 router.get('/:id', async (req, res) => {
   try {
@@ -149,10 +154,9 @@ router.get('/:id', async (req, res) => {
       content: diary.content,
       status: diary.status,
       media: [
-        ...(diary.DiaryVideo 
+        ...(diary.DiaryVideo
           ? [{ type: 'video', url: diary.DiaryVideo.video_url }]
           : []),
-
         ...(diary.DiaryImages || []).map(img => ({
           type: 'image',
           url: img.image_url
@@ -169,121 +173,60 @@ router.get('/:id', async (req, res) => {
       created_at: diary.created_at,
       updated_at: diary.updated_at
     };
-
-    console.log(response)
     res.json(response);
   } catch (err) {
     console.error('Error fetching diary:', err);
     res.status(500).json({ error: '获取游记详情失败', details: err.message });
   }
 });
-
-// 删除
+// 删除接口
 router.delete('/:id', async (req, res) => {
   try {
-    // 直接删除记录
-    await Diary.destroy({
-      where: { id: req.params.id }
-    });
+    await Diary.update(
+      { is_deleted: true },
+      { where: { id: req.params.id } }
+    );
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: '删除失败' });
   }
 });
 
-//----------------------------------------------------------------------------
+// 更改帖子状态
+router.patch('/updateStatus/:id', async (req, res) => {
+  const { id } = req.params; // 获取帖子 ID
+  const { status, rejection_reason } = req.body; // 获取新的状态和拒绝原因
 
-const storageImages = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/diary_images/');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuidv4()}${ext}`);
+  // 检查状态是否合法
+  const validStatuses = ['pending', 'approved', 'rejected', 'deleted'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ error: '无效的状态值' });
   }
-});
 
-const storageVideo = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/diary_videos/');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuidv4()}${ext}`);
+  // 如果状态是 rejected，必须提供 rejection_reason
+  if (status === 'rejected' && (!rejection_reason || rejection_reason.trim() === '')) {
+    return res.status(400).json({ error: '拒绝原因不能为空' });
   }
-});
 
-
-const uploadImages = multer({ storage: storageImages }).array('images');
-const uploadVideo = multer({ storage: storageVideo }).single('video');
-
-router.post('/publish', async (req, res) => {
-  const transaction = await sequelize.transaction();
   try {
-    const { userId, title, content } = req.body;
-
-    const diary = await Diary.create({
-      user_id: userId,
-      title,
-      content,
-      status: 'pending'
-    }, { transaction });
-
-    await transaction.commit();
-    console.log(diary.id);
-    res.status(201).json({ 
-      diaryId: diary.id,
-      message: '游记创建成功，待审核' 
-    });
-  } catch (error) {
-    await transaction.rollback();
-    res.status(500).json({ error: '创建游记失败' });
-  }
-});
-
-// 图片上传接口
-router.post('/uploadImages', uploadImages, async (req, res) => {
-  const transaction = await sequelize.transaction();
-  try {
-    const diaryId = req.body.diaryId;
-    
-    if (req.files?.length) {
-      const images = req.files.map((file) => ({
-        diary_id: diaryId,
-        image_url: `/diary_images/${file.filename}`,
-        sort_order: 0
-      }));
-      
-      await DiaryImage.bulkCreate(images, { transaction });
+    // 查找并更新帖子状态
+    const diary = await Diary.findByPk(id);
+    if (!diary) {
+      return res.status(404).json({ error: '帖子不存在' });
     }
 
-    await transaction.commit();
-    res.json({ message: '图片上传成功' });
-  } catch (error) {
-    await transaction.rollback();
-    res.status(500).json({ error: '图片上传失败' });
-  }
-});
-
-// 视频上传接口
-router.post('/uploadVideo', uploadVideo, async (req, res) => {
-  const transaction = await sequelize.transaction();
-  try {
-    const { diaryId } = req.body;
-    console.log('Received video file:', req.file);  
-
-    if (req.file) {
-      await DiaryVideo.create({
-        diary_id: diaryId,
-        video_url: `/diary_videos/${req.file.filename}`
-      }, { transaction });
+    diary.status = status;
+    if (status === 'rejected') {
+      diary.rejection_reason = rejection_reason; // 更新拒绝原因
+    } else {
+      diary.rejection_reason = null; // 如果不是 rejected，清空拒绝原因
     }
+    await diary.save();
 
-    await transaction.commit();
-    res.json({ message: '视频上传成功' });
-  } catch (error) {
-    await transaction.rollback();
-    res.status(500).json({ error: '视频上传失败' });
+    res.json({ message: '状态更新成功', diary });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '服务器错误' });
   }
 });
 
