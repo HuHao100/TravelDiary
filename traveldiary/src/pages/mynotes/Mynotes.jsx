@@ -85,9 +85,25 @@ const Mynotes = () => {
                     </svg>
                 </button>
                 <h2 style={{ margin: 0, fontSize: '20px', color: '#333' }}>我的</h2>
-                <button onClick={handleAddNew} style={{ border: 'none', background: 'none', color: 'blue', fontSize: '16px', fontWeight: 'bold' }}>
-                    + 新增
-                </button>
+
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <button 
+                        onClick={() => navigate('/login')}
+                        style={{ 
+                        border: 'none', 
+                        background: 'none', 
+                        color: 'blue', 
+                        fontSize: '16px',
+                        padding: '4px 8px',
+                        fontWeight: 'bold'
+                        }}
+                    >
+                        切换账号
+                    </button>
+                    <button onClick={handleAddNew} style={{ border: 'none', background: 'none', color: 'blue', fontSize: '16px', fontWeight: 'bold' }}>
+                        + 新增
+                    </button>
+                </div>
             </div>
 
             {notes.map((note) => (
@@ -117,10 +133,13 @@ const Mynotes = () => {
                         }}>
                             {note.status}
                         </button>
-
-                        <button onClick={() => handleEdit(note.id)} style={{ border: '1px solid #d9d9d9', background: 'none', color: '#1890ff', padding: '8px 16px', borderRadius: '4px', marginRight: '8px', cursor: note.status === '已通过' ? 'not-allowed' : 'pointer' }}>
+                    
+                    {note.status !== '已通过' && (
+                        <button
+                            onClick={() => handleEdit(note.id)} style={{ border: '1px solid #d9d9d9', background: 'none', color: '#1890ff', padding: '8px 16px', borderRadius: '4px', marginRight: '8px' }}>
                             编辑
                         </button>
+                    )}
 
                         <button onClick={() => handleDelete(note.id)} style={{ border: '1px solid #d9d9d9', background: 'none', color: '#1890ff', padding: '8px 16px', borderRadius: '4px' }}>
                             删除

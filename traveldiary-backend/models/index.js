@@ -17,9 +17,6 @@ DiaryComment.belongsTo(Diary, { foreignKey: 'diary_id' });
 User.hasMany(DiaryComment, { foreignKey: 'user_id' });
 DiaryComment.belongsTo(User, { foreignKey: 'user_id' });
 
-
-
-
 // 日记与图片
 Diary.hasMany(DiaryImage, { foreignKey: 'diary_id' });
 DiaryImage.belongsTo(Diary, { foreignKey: 'diary_id' });

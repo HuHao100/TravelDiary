@@ -1,3 +1,4 @@
+console.log('App starting...');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -16,11 +17,16 @@ app.use(cors());
 app.use(express.static('public'));
 app.use('/api/avatars', express.static('public/avatars/'));
 app.use('/api/diary_images', express.static('public/diary_images'));
+app.use('/api/diary_videos', express.static('public/diary_videos'));
 
 app.use(bodyParser.json());
 
 app.use('/api/diaries', require('./routes/diaries'));
 app.use('/api/users', require('./routes/users'));
+
+// 点赞  评论
+app.use('/api/likes', require('./routes/diary_likes'));
+app.use('/api/comments', require('./routes/diary_comments'));
 
 
 // 同步数据库并启动服务
