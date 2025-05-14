@@ -7,19 +7,20 @@ import { LeftOutlined } from "@ant-design/icons";
 const { Header, Content } = Layout;
 
 export default function Details() {
-  const { state: { id, returnFlag, filterStatus, searchValue, allItems, currentIndex } } = useLocation(); // 接收传递的路由状态
-  const navigate = useNavigate(); // 用于返回列表页面
-  const [detailedItem, setDetailedItem] = useState(null); // 存储后端返回的详细数据
-  const [isLoading, setIsLoading] = useState(true); // 加载状态
-  const [currentItemIndex, setCurrentItemIndex] = useState(currentIndex); // 当前游记索引
-  const [items] = useState(allItems); // 使用传递的筛选后的游记列表
+  const { state: { id, returnFlag, filterStatus, searchValue, allItems, currentIndex } } = useLocation();
+  const navigate = useNavigate();
+  const [detailedItem, setDetailedItem] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentItemIndex, setCurrentItemIndex] = useState(currentIndex);
+  const [items] = useState(allItems);
+  const user = JSON.parse(localStorage.getItem("user") || "{}"); // 获取当前用户信息
 
   useEffect(() => {
     const fetchDiaryDetails = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/diaries/${id}`);
-        setDetailedItem(response.data); // 更新为接口返回的详细数据
-        setIsLoading(false); // 加载完成
+        setDetailedItem(response.data);
+        setIsLoading(false);
       } catch (error) {
         console.error("获取游记详情失败:", error);
         Modal.error({
@@ -30,7 +31,6 @@ export default function Details() {
         setIsLoading(false);
       }
     };
-
     fetchDiaryDetails();
   }, [id]);
 
@@ -81,24 +81,36 @@ export default function Details() {
   // 审核按钮逻辑
   const handleAudit = (status) => {
     Modal.confirm({
-      title: `确认将该游记标记为${status === "approved" ? "通过" : "拒绝"}吗？`,
+      title: `确认将该游记标记为${status === "approved" ? "通过" : status === "rejected" ? "拒绝" : status === "pending" ? "恢复" : "删除"}吗？`,
       onOk: async () => {
         try {
-          await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/diaries/${id}/status`, { status });
+          await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/diaries/updateStatus/${id}`, { status });
           Modal.success({
             title: "操作成功",
-            content: `游记已标记为${status === "approved" ? "通过" : "拒绝"}！`,
+            content:
+              status === "approved"
+                ? "游记已标记为通过！"
+                : status === "rejected"
+                ? "游记已标记为拒绝！"
+                : status === "pending"
+                ? "游记已恢复！"
+                : "游记已删除！",
+            onOk: () => window.location.reload(),
           });
         } catch (error) {
-          console.error("审核失败:", error);
+          console.error("操作失败:", error);
           Modal.error({
             title: "操作失败",
-            content: "审核操作失败，请稍后重试。",
+            content: "操作失败，请稍后重试。",
           });
         }
       },
     });
   };
+
+  // 判断是否为回收站
+  const isDeleted = detailedItem.status === "deleted";
+  const isAdmin = user.role === "管理员";
 
   return (
     <Layout>
@@ -123,9 +135,9 @@ export default function Details() {
           onClick={() =>
             navigate(`/`, {
               state: {
-                returnFlag, // 当前菜单项
-                filterStatus, // 当前筛选状态
-                searchValue, // 当前搜索框的值
+                returnFlag,
+                filterStatus,
+                searchValue,
               },
             })
           }
@@ -134,19 +146,36 @@ export default function Details() {
           返回列表
         </Button>
         <div>
-          <Button type="primary" onClick={() => handleAudit("approved")} style={{ marginRight: 10 }}>
-            通过
-          </Button>
-          <Button type="primary" danger onClick={() => handleAudit("rejected")}>
-            拒绝
-          </Button>
+          {/* 回收站显示恢复按钮 */}
+          {isAdmin && isDeleted && (
+            <Button type="primary" onClick={() => handleAudit("pending")} style={{ marginRight: 10 }}>
+              恢复
+            </Button>
+          )}
+          {/* 非回收站显示审核按钮 */}
+          {!isDeleted && (
+            <>
+              <Button type="primary" onClick={() => handleAudit("approved")} style={{ marginRight: 10 }}>
+                通过
+              </Button>
+              <Button type="primary" danger onClick={() => handleAudit("rejected")} style={{ marginRight: 10 }}>
+                拒绝
+              </Button>
+            </>
+          )}
+          {/* 管理员显示删除按钮，回收站不显示 */}
+          {isAdmin && !isDeleted && (
+            <Button danger onClick={() => handleAudit("deleted")}>
+              删除
+            </Button>
+          )}
         </div>
       </Header>
 
       {/* 固定左右切换按钮 */}
       <Button
         type="primary"
-        disabled={currentItemIndex === 0} // 到达第一个游记时禁用
+        disabled={currentItemIndex === 0}
         onClick={handlePrevious}
         style={{
           position: "fixed",
@@ -160,7 +189,7 @@ export default function Details() {
       </Button>
       <Button
         type="primary"
-        disabled={currentItemIndex === items.length - 1} // 到达最后一个游记时禁用
+        disabled={currentItemIndex === items.length - 1}
         onClick={handleNext}
         style={{
           position: "fixed",
@@ -176,7 +205,7 @@ export default function Details() {
       {/* 内容部分 */}
       <Content
         style={{
-          padding: "100px 100px", // 增加左右内边距，避免与按钮重叠
+          padding: "100px 200px",
           display: "flex",
           alignItems: "center",
         }}
@@ -190,40 +219,62 @@ export default function Details() {
             <p style={{ margin: 0, fontSize: "16px" }}>
               <strong>发布时间：</strong> {detailedItem.created_at}
             </p>
+            <p style={{ margin: 0, fontSize: "16px" }}>
+              <strong>当前状态：</strong>
+              <span style={{
+                color:
+                  detailedItem.status === "pending"
+                    ? "#1677ff"
+                    : detailedItem.status === "approved"
+                    ? "#52c41a"
+                    : detailedItem.status === "rejected"
+                    ? "#ff4d4f"
+                    : detailedItem.status === "deleted"
+                    ? "#888"
+                    : "#333"
+              }}>
+                {detailedItem.status === "pending"
+                  ? "待审核"
+                  : detailedItem.status === "approved"
+                  ? "已通过"
+                  : detailedItem.status === "rejected"
+                  ? "已拒绝"
+                  : detailedItem.status === "deleted"
+                  ? "已删除"
+                  : detailedItem.status}
+              </span>
+            </p>
           </div>
           <div style={{ marginBottom: 20 }}>
             <p style={{ fontSize: "16px", lineHeight: "1.8" }}>{detailedItem.content}</p>
           </div>
           <div style={{ marginBottom: 20 }}>
-            {detailedItem.media.map((media, index) => (
-              <div key={index} style={{ marginBottom: 10 }}>
-                {media.type === "image" ? (
+            {/* 视频独占一行 */}
+            {detailedItem.media
+              .filter((media) => media.type === "video")
+              .map((media, index) => (
+                <div key={index} style={{ marginBottom: 20 }}>
+                  <video
+                    src={`${process.env.REACT_APP_API_BASE_URL}${media.url}`}
+                    controls
+                    style={{ width: "400px", borderRadius: "8px", display: "block", margin: "0" }}
+                  />
+                </div>
+              ))}
+            {/* 图片横向排列 */}
+            <div style={{ display: "flex", gap: 16 }}>
+              {detailedItem.media
+                .filter((media) => media.type === "image")
+                .map((media, index) => (
                   <Image
-                    src={`${process.env.REACT_APP_API_BASE_URL}${media.url}`} // 补全图片路径
+                    key={index}
+                    src={`${process.env.REACT_APP_API_BASE_URL}${media.url}`}
                     alt="media"
-                    width={200} // 缩略图大小
+                    width={200}
                     style={{ borderRadius: "8px" }}
                   />
-                ) : (
-                  <video
-                    src={`${process.env.REACT_APP_API_BASE_URL}${media.url}`} // 补全视频路径
-                    controls
-                    style={{ width: "200px", borderRadius: "8px" }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-          <div>
-            <strong>评论：</strong>
-            {detailedItem.comments.map((comment) => (
-              <div key={comment.id} style={{ marginBottom: 10 }}>
-                <p>
-                  <strong>{comment.user}：</strong> {comment.content}
-                </p>
-                <p style={{ fontSize: "12px", color: "#999" }}>{comment.created_at}</p>
-              </div>
-            ))}
+                ))}
+            </div>
           </div>
         </div>
       </Content>

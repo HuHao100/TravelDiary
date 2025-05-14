@@ -16,10 +16,11 @@ export default function Home() {
   const [filterStatus, setFilterStatus] = useState(initialFilterStatus);
   const [searchValue, setSearchValue] = useState(initialSearchValue);
 
-  const user = JSON.parse(localStorage.getItem("user")); // 获取登录用户信息
+  const [user] = useState(() => JSON.parse(localStorage.getItem("user"))); // 获取登录用户信息
   const [diaries, setDiaries] = useState([]); // 存储游记数据
   const [filteredData, setFilteredData] = useState([]); // 存储筛选后的数据
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const convertStatus = new Map([
     ["pending", "待审核"],
@@ -36,21 +37,36 @@ export default function Home() {
   useEffect(() => {
     const fetchDiaries = async () => {
       try {
-        console.log("请求 URL:", `${process.env.REACT_APP_API_BASE_URL}/api/diaries/getAll`);
-        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/diaries/getAll`);
-        const dataWithFullImageUrl = response.data.map((item) => ({
+        setLoading(true);
+        // 获取正常状态的游记
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/diaries/getAll`);
+        let dataWithFullImageUrl = res.data.map((item) => ({
           ...item,
-          image_url: `${process.env.REACT_APP_API_BASE_URL}${item.image_url}`, // 拼接完整的图片路径
-        })); // 调用后端接口
+          image_url: `${process.env.REACT_APP_API_BASE_URL}${item.image_url}`,
+        }));
+
+        // 如果是管理员，再获取deleted状态的游记并合并
+        if (user?.role === "管理员") {
+          const deletedRes = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/diaries/getDeleted`);
+          const deletedWithFullImageUrl = deletedRes.data.map((item) => ({
+            ...item,
+            image_url: `${process.env.REACT_APP_API_BASE_URL}${item.image_url}`,
+          }));
+          dataWithFullImageUrl = [...dataWithFullImageUrl, ...deletedWithFullImageUrl];
+        }
+
         setDiaries(dataWithFullImageUrl);
         setFilteredData(dataWithFullImageUrl);
+        setLoading(false);
       } catch (error) {
         console.error("获取游记失败:", error);
         message.error("获取游记失败，请稍后重试！");
+        setLoading(false);
       }
     };
     fetchDiaries();
-  }, []);
+    // user 变化时也要重新拉取
+  }, [user]);
 
   // 菜单点击事件
   const handleMenuClick = (e) => {
@@ -66,7 +82,7 @@ export default function Home() {
       if (selectedMenu === "1") {
         return item.status === "pending";
       } else if (selectedMenu === "2") {
-        if (filterStatus === "all") return item.status !== "pending";
+        if (filterStatus === "all") return item.status == "approved" || item.status === "rejected";
         return item.status === filterStatus;
       } else if (selectedMenu === "3" && user.role === "管理员") {
         return item.status === "deleted";
@@ -84,6 +100,7 @@ export default function Home() {
     );
 
     setFilteredData(finalFiltered);
+    console.log("筛选后的数据:", finalFiltered);
   }, [diaries, selectedMenu, filterStatus, searchValue, user.role]);
 
   const handleSearch = (value) => {
@@ -93,6 +110,7 @@ export default function Home() {
   const handleReset = () => {
     setSearchValue(""); // 清空搜索框的值
   };
+
 
   return (
     <Layout>
@@ -109,6 +127,9 @@ export default function Home() {
           ]}
           style={{ flex: 1, minWidth: 0 }}
         />
+        <span style={{ marginRight: 16, color: "#888", fontSize: 16 }}>
+          当前角色：{user.role}
+        </span>
         <Avatar
           src="/avatar.jpg"
           style={{ cursor: "pointer" }}
@@ -149,67 +170,81 @@ export default function Home() {
           </Button>
         </div>
         <div style={{ margin: 20, minHeight: 380, background: "#fff", borderRadius: "8px", padding: 20 }}>
-          <List
-            itemLayout="horizontal"
-            dataSource={filteredData}
-            renderItem={(item, index) => (
-              <List.Item
-                key={item.id}
-                onClick={() =>
-                  navigate(`/details/${item.id}`, {
-                    state: {
-                      id: item.id, // 仅传递 id
-                      returnFlag: selectedMenu,
-                      filterStatus, // 当前筛选状态
-                      searchValue, // 当前搜索框的值
-                      allItems: filteredData, // 确保传递筛选后的游记列表
-                      currentIndex: index, // 当前游记索引
-                    },
-                  })
-                }
-                style={{ cursor: "pointer", alignItems: "center" }}
-              >
-                <div style={{ marginRight: 20 }}>
-                  <img
-                    src={item.image_url} // 使用后端返回的图片路径
-                    alt="cover"
-                    style={{
-                      width: 100,
-                      height: 100,
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                    }}
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>{item.title}</h3>
-                  <p style={{ margin: "8px 0", color: "#666", fontSize: "14px", lineHeight: "1.5" }}>
-                    {item.content}
-                  </p>
-                  <p style={{ margin: 0, fontSize: "12px", color: "#999" }}>
-                    <strong>发布时间：</strong> {item.created_at}
-                  </p>
-                </div>
-                <Tag
-                  color={item.status === "pending" ? "blue" : item.status === "rejected" ? "red" : "green"}
-                  style={{
-                    marginLeft: 20,
-                    fontSize: "16px",
-                    padding: "5px 10px",
-                    borderRadius: "4px",
-                  }}
+          
+            <List
+              itemLayout="horizontal"
+              dataSource={filteredData}
+              renderItem={(item, index) => (
+                <List.Item
+                  key={item.id}
+                  onClick={() =>
+                    navigate(`/details/${item.id}`, {
+                      state: {
+                        id: item.id, // 仅传递 id
+                        returnFlag: selectedMenu,
+                        filterStatus, // 当前筛选状态
+                        searchValue, // 当前搜索框的值
+                        allItems: filteredData, // 确保传递筛选后的游记列表
+                        currentIndex: index, // 当前游记索引
+                      },
+                    })
+                  }
+                  style={{ cursor: "pointer", alignItems: "center" }}
                 >
-                  {convertStatus.get(item.status)}
-                </Tag>
-              </List.Item>
-            )}
-          />
+                  <div style={{ marginRight: 20 }}>
+                    <img
+                      src={item.image_url} // 使用后端返回的图片路径
+                      alt="cover"
+                      style={{
+                        width: 100,
+                        height: 100,
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>{item.title}</h3>
+                    <p style={{ margin: "8px 0", color: "#666", fontSize: "14px", lineHeight: "1.5" }}>
+                      {item.content}
+                    </p>
+                    <p style={{ margin: 0, fontSize: "12px", color: "#999", display: "flex", alignItems: "center" }}>
+                      <span style={{ marginRight: 12 }}>
+                        <strong>发布者：</strong>{item.user?.nickname}
+                      </span>
+                      <span>
+                        <strong>发布时间：</strong>{item.created_at}
+                      </span>
+                    </p>
+                  </div>
+                  <Tag
+                    color={
+                      item.status === "pending"
+                        ? "blue"
+                        : item.status === "rejected"
+                        ? "red"
+                        : item.status === "deleted"
+                        ? "gray"
+                        : "green"
+                    }
+                    style={{
+                      marginLeft: 20,
+                      fontSize: "16px",
+                      padding: "5px 10px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {convertStatus.get(item.status)}
+                  </Tag>
+                </List.Item>
+              )}
+            />
         </div>
         <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           <Pagination style={{ margin: "auto", textAlign: "center" }} defaultCurrent={1} total={filteredData.length} pageSize={10} />
         </div>
       </Content>
-      <Footer style={{ textAlign: "center" }}>{new Date().getFullYear()}@jierwusha</Footer>
+      <Footer style={{ textAlign: "center" }}>{new Date().getFullYear()}@traveldiary</Footer>
       <Drawer
         title="用户信息"
         placement="right"
@@ -219,6 +254,7 @@ export default function Home() {
         <div style={{ textAlign: "center" }}>
           <Avatar src="/avatar.jpg" size={64} />
           <h3 style={{ marginTop: 10 }}>{user.name}</h3>
+          <p>用户：{user.username}</p>
           <p>当前角色：{user.role}</p>
           <Button
             type="primary"
