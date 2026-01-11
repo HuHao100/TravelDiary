@@ -30,7 +30,7 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    console.log("恢复筛选条件:", { returnFlag, filterStatus, searchValue });
+    //console.log("恢复筛选条件:", { returnFlag, filterStatus, searchValue });
   }, [returnFlag, filterStatus, searchValue]);
 
   // 获取游记数据
@@ -100,7 +100,7 @@ export default function Home() {
     );
 
     setFilteredData(finalFiltered);
-    console.log("筛选后的数据:", finalFiltered);
+    //console.log("筛选后的数据:", finalFiltered);
   }, [diaries, selectedMenu, filterStatus, searchValue, user.role]);
 
   const handleSearch = (value) => {

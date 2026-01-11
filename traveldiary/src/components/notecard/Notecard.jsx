@@ -28,8 +28,8 @@ export default function Notecard({ title, username, cover, avatar, onClick }) {
           objectFit: 'contain',
         }}
       />
-      <div style={{ padding: '0.3rem' }}>
-        <div style={{ fontWeight: 'bold', fontSize: '0.3rem', marginBottom: '0.2rem' }}>
+      <div style={{ padding: '0.2rem' }}>
+        <div style={{ fontWeight: 'bold', fontSize: '0.2rem', marginBottom: '0.2rem' }}>
           {title}
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -40,10 +40,10 @@ export default function Notecard({ title, username, cover, avatar, onClick }) {
               width: '24px', 
               height: '24px', 
               borderRadius: '50%', 
-              marginRight: '0.2rem' 
+              marginRight: '0.1rem' 
             }} 
           />
-          <span style={{ fontSize: '0.2rem', color: '#666' }}>{username}</span>
+          <span style={{ fontSize: '0.15rem', color: '#666' }}>{username}</span>
         </div>
       </div>
     </div>

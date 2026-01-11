@@ -6,6 +6,7 @@ import Mynotes from '../pages/mynotes/Mynotes'
 import Publish from '../pages/publish/Publish.jsx'
 import Layout from '../pages/Layout.jsx'
 import Details from "../pages/details/Details";
+import Search from '../pages/search/Search';
 
 const routes = [
     {
@@ -35,6 +36,10 @@ const routes = [
             {
                 path:'/details/:id',
                 element:<Details/>
+            },
+            {
+                path:'/search',
+                element:<Search/>
             }
         ]        
     }

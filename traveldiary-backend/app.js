@@ -1,4 +1,4 @@
-console.log('App starting...');
+console.log('启动程序');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -33,7 +33,7 @@ app.use('/api/comments', require('./routes/diary_comments'));
 sequelize.sync().then(() => {
   console.log('数据库连接成功');
   app.listen(process.env.PORT, () => {
-    console.log(`Server started on port ${process.env.PORT}`);
+    console.log(`服务启动，监听端口: ${process.env.PORT}`);
   });
 }).catch(err => {
   console.error('数据库连接失败:', err);

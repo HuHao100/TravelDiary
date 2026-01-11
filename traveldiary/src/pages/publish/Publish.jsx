@@ -113,9 +113,8 @@ const Publish = () => {
 
   return (
     <div style={{ 
-      padding: '16px',
       background: '#f5f5f5',
-      minHeight: '100vh'
+      height:"100vh"
     }}>
       <Form
         form={form}
@@ -134,7 +133,7 @@ const Publish = () => {
               shape="rounded"
               size="large"
             >
-              发布游记
+              发布
             </Button>
           </div>
         }
@@ -165,7 +164,6 @@ const Publish = () => {
         {/* 图片上传区域 */}
         <Form.Item label="上传图片（最多9张）">
           <div style={{
-            border: '1px dashed #1890ff',
             borderRadius: '8px',
             padding: '12px',
             background: 'white'
@@ -183,32 +181,46 @@ const Publish = () => {
               onClick={() => imageInputRef.current.click()}
               style={{ color: '#1890ff' }}
             >
-              选择图片
+              添加图片
             </Button>
             
-            <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ 
+              marginTop: '12px', 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(3, 1fr)', 
+              gap: '8px' 
+            }}>
               {images.map((file, index) => (
-                <div key={index} style={{ position: 'relative' }}>
+                <div key={index} style={{ 
+                  position: 'relative',
+                  aspectRatio: '1',
+                  width: '100%'
+                }}>
                   <img
                     src={URL.createObjectURL(file)}
                     alt="预览"
                     style={{
-                      width: '80px',
-                      height: '80px',
+                      width: '100%',
+                      height: '100%',
                       objectFit: 'cover',
-                      borderRadius: '4px'
+                      borderRadius: '8px',
+                      display: 'block'
                     }}
                   />
                   <Button
                     size="mini"
                     style={{
                       position: 'absolute',
-                      top: '-8px',
-                      right: '-8px',
-                      minWidth: '24px',
-                      height: '24px',
-                      borderRadius: '12px',
-                      padding: '0'
+                      top: '4px',
+                      right: '4px',
+                      minWidth: '20px',
+                      height: '20px',
+                      borderRadius: '10px',
+                      padding: '0',
+                      backgroundColor: 'rgba(0,0,0,0.6)',
+                      color: '#fff',
+                      fontSize: '12px',
+                      border: 'none'
                     }}
                     onClick={() => removeImage(index)}
                   >
@@ -219,7 +231,7 @@ const Publish = () => {
             </div>
             {images.length > 0 && (
               <div style={{ marginTop: '8px', color: '#666', fontSize: '12px' }}>
-                已选择 {images.length} 张图片
+                已添加 {images.length} 张图片
               </div>
             )}
           </div>
@@ -228,7 +240,6 @@ const Publish = () => {
         {/* 视频上传区域 */}
         <Form.Item label="上传视频（仅限1个）">
           <div style={{
-            border: '1px dashed #1890ff',
             borderRadius: '8px',
             padding: '12px',
             background: 'white'
@@ -245,7 +256,7 @@ const Publish = () => {
               onClick={() => videoInputRef.current.click()}
               style={{ color: '#1890ff' }}
             >
-              选择视频
+              上传视频
             </Button>
             
             {video && (
