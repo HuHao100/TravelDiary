@@ -1,7 +1,8 @@
 import React from "react";
+import { HeartFill } from 'antd-mobile-icons';
 
 // 添加onClick参数
-export default function Notecard({ title, username, cover, avatar, onClick }) {
+export default function Notecard({ title, username, cover, avatar, likeCount, onClick }) {
   return (
     <div 
       style={{
@@ -32,18 +33,26 @@ export default function Notecard({ title, username, cover, avatar, onClick }) {
         <div style={{ fontWeight: 'bold', fontSize: '0.2rem', marginBottom: '0.2rem' }}>
           {title}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img 
-            src={avatar} 
-            alt="头像" 
-            style={{ 
-              width: '24px', 
-              height: '24px', 
-              borderRadius: '50%', 
-              marginRight: '0.1rem' 
-            }} 
-          />
-          <span style={{ fontSize: '0.15rem', color: '#666' }}>{username}</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <img 
+              src={avatar} 
+              alt="头像" 
+              style={{ 
+                width: '24px', 
+                height: '24px', 
+                borderRadius: '50%', 
+                marginRight: '0.1rem' 
+              }} 
+            />
+            <span style={{ fontSize: '0.15rem', color: '#666' }}>{username}</span>
+          </div>
+          {likeCount !== undefined && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <HeartFill style={{ color: '#ff4d4f', fontSize: '12px' }} />
+              <span style={{ fontSize: '0.13rem', color: '#999' }}>{likeCount}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

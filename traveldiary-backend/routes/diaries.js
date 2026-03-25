@@ -59,7 +59,7 @@ router.get('/getAll', async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ['id', 'nickname', 'avatar_url'], // 添加id字段
+          attributes: ['id', 'nickname', 'avatar_url'],
           required: true
         },
         {
@@ -67,8 +67,21 @@ router.get('/getAll', async (req, res) => {
           attributes: ['image_url'],
           limit: 1,
           required: false
+        },
+        {
+          model: DiaryLike,
+          attributes: [],
+          required: false
         }
       ],
+      attributes: {
+        include: [
+          [sequelize.fn('COUNT', sequelize.col('DiaryLikes.id')), 'likeCount']
+        ]
+      },
+      group: ['Diary.id'],
+      raw: false,
+      subQuery: false,
       order: [['created_at', 'DESC']]
     });
 
@@ -84,7 +97,8 @@ router.get('/getAll', async (req, res) => {
       user: {
         nickname: diary.User.nickname,
         avatar_url: `${diary.User.avatar_url}`
-      }
+      },
+      likeCount: parseInt(diary.dataValues.likeCount) || 0
     }));
 
     res.json(formatted);
@@ -287,8 +301,21 @@ router.get('/sorted/byTime', async (req, res) => {
           attributes: ['image_url'],
           limit: 1,
           required: false
+        },
+        {
+          model: DiaryLike,
+          attributes: [],
+          required: false
         }
       ],
+      attributes: {
+        include: [
+          [sequelize.fn('COUNT', sequelize.col('DiaryLikes.id')), 'likeCount']
+        ]
+      },
+      group: ['Diary.id'],
+      raw: false,
+      subQuery: false,
       order: [['created_at', 'DESC']]
     });
 
@@ -305,6 +332,7 @@ router.get('/sorted/byTime', async (req, res) => {
         nickname: diary.User.nickname,
         avatar_url: `${diary.User.avatar_url}`
       },
+      likeCount: parseInt(diary.dataValues.likeCount) || 0,
       created_at: diary.created_at
     }));
 
@@ -357,6 +385,8 @@ router.patch('/updateStatus/:id', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     console.log('Fetching diary with ID:', req.params.id);
+    const userId = req.query.userId ? parseInt(req.query.userId) : null;
+
     const diary = await Diary.findByPk(req.params.id, {
       include: [
         {
@@ -418,6 +448,7 @@ router.get('/:id', async (req, res) => {
         }))
       ],
       likes: diary.DiaryLikes.length,
+      userLiked: userId ? diary.DiaryLikes.some(like => like.user_id === userId) : false,
       comments: diary.DiaryComments.map(comment => ({
         id: comment.id,
         user: comment.User.nickname,

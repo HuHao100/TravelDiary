@@ -1,7 +1,29 @@
 const router = require('express').Router();
 const { DiaryLike, User, Diary } = require('../models');
 
-// µãÔŞ/È¡ÏûµãÔŞ
+// æŸ¥è¯¢ç”¨æˆ·æ˜¯å¦å·²ç‚¹èµ
+router.get('/:diaryId', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const { diaryId } = req.params;
+
+    const count = await DiaryLike.count({ where: { diary_id: diaryId } });
+
+    if (!userId) {
+      return res.json({ liked: false, count });
+    }
+
+    const existingLike = await DiaryLike.findOne({
+      where: { user_id: userId, diary_id: diaryId }
+    });
+
+    res.json({ liked: !!existingLike, count });
+  } catch (error) {
+    res.status(500).json({ error: 'æŸ¥è¯¢å¤±è´¥' });
+  }
+});
+
+// ç‚¹èµ/å–æ¶ˆç‚¹èµ
 router.post('/:diaryId', async (req, res) => {
   try {
     const userId = req.body.userId;
@@ -26,7 +48,7 @@ router.post('/:diaryId', async (req, res) => {
 
     res.json({ success: true, count: newCount });
   } catch (error) {
-    res.status(500).json({ error: '²Ù×÷Ê§°Ü' });
+    res.status(500).json({ error: 'æ“ä½œå¤±è´¥' });
   }
 });
 

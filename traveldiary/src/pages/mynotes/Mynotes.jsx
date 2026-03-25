@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, Toast, Image, Button } from 'antd-mobile'
-import { SearchOutline } from 'antd-mobile-icons';
+import { SearchOutline, SetOutline } from 'antd-mobile-icons';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
 
@@ -133,7 +133,6 @@ const Mynotes = () => {
                 zIndex: 100,
                 backgroundColor: '#FFFFFF',
                 borderBottom: '1px solid #f0f0f0',
-                textAlign: 'center',
                 padding: '0 16px',
                 flexShrink: 0
             }}>
@@ -141,12 +140,28 @@ const Mynotes = () => {
                     height: '50px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     fontSize: '18px',
                     fontWeight: 600,
                     color: '#333333'
                 }}>
-                    我的游记
+                    <div style={{ width: '32px' }}></div>
+                    <span>我的游记</span>
+                    <button
+                        onClick={() => navigate('/settings')}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: '4px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: '#666'
+                        }}
+                        aria-label="设置"
+                    >
+                        <SetOutline style={{ fontSize: '22px' }} />
+                    </button>
                 </div>
             </div>
 

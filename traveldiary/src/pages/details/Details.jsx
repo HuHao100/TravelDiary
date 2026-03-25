@@ -126,7 +126,8 @@ export default function Details() {
    */
   const fetchDetailData = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/diaries/${id}`);
+      const params = user ? { userId: user.id } : {};
+      const response = await axios.get(`${API_BASE_URL}/diaries/${id}`, { params });
       const data = response.data;
 
       // 数据格式验证
