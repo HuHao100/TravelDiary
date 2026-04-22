@@ -21,7 +21,6 @@ export default function Home() {
   const [diaries, setDiaries] = useState([]); // 存储游记数据
   const [filteredData, setFilteredData] = useState([]); // 存储筛选后的数据
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
   const statusChartRef = useRef(null);
   const authorChartRef = useRef(null);
   const trendChartRef = useRef(null);
@@ -42,7 +41,6 @@ export default function Home() {
   useEffect(() => {
     const fetchDiaries = async () => {
       try {
-        setLoading(true);
         // 获取正常状态的游记
         const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/diaries/getAll`);
         let dataWithFullImageUrl = res.data.map((item) => ({
@@ -62,11 +60,9 @@ export default function Home() {
 
         setDiaries(dataWithFullImageUrl);
         setFilteredData(dataWithFullImageUrl);
-        setLoading(false);
       } catch (error) {
         console.error("获取游记失败:", error);
         message.error("获取游记失败，请稍后重试！");
-        setLoading(false);
       }
     };
     fetchDiaries();
@@ -87,7 +83,7 @@ export default function Home() {
       if (selectedMenu === "1") {
         return item.status === "pending";
       } else if (selectedMenu === "2") {
-        if (filterStatus === "all") return item.status == "approved" || item.status === "rejected";
+        if (filterStatus === "all") return item.status === "approved" || item.status === "rejected";
         return item.status === filterStatus;
       } else if (selectedMenu === "3" && user.role === "管理员") {
         return item.status === "deleted";
