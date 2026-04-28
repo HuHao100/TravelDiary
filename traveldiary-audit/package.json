@@ -12,7 +12,7 @@
     "axios": "^1.9.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.0",
+    "react-router-dom": "^7.14.2",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
@@ -27,6 +27,11 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js"
+    }
   },
   "browserslist": {
     "production": [
