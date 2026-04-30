@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import NoteCard from "../../components/notecard/Notecard";
 import axios from "axios";
 import API_BASE_URL from "../../config";
+import { useAppContext } from "../../context/AppContext";
 
 export default function Home() {
   // 改进1: 分开存储三个标签页的数据
@@ -21,6 +22,7 @@ export default function Home() {
   const [loadedTabs, setLoadedTabs] = useState(new Set(['recommended']));
   
   const navigate = useNavigate();
+  const { t } = useAppContext();
 
   // 获取发现页数据
   const fetchAllDiaries = async () => {
@@ -37,7 +39,7 @@ export default function Home() {
       // 只更新对应标签页的数据
       setNotesData(prev => ({ ...prev, recommended: formattedData }));
     } catch (error) {
-      Toast.show({ content: '加载游记失败', position: 'bottom' });
+      Toast.show({ content: t('home.load.failed'), position: 'bottom' });
     } finally {
       setLoading(false);
     }
@@ -57,7 +59,7 @@ export default function Home() {
       }));
       setNotesData(prev => ({ ...prev, trending: formattedData }));
     } catch (error) {
-      Toast.show({ content: '加载热门游记失败', position: 'bottom' });
+      Toast.show({ content: t('home.trending.failed'), position: 'bottom' });
     } finally {
       setLoading(false);
     }
@@ -78,7 +80,7 @@ export default function Home() {
       }));
       setNotesData(prev => ({ ...prev, nearest: formattedData }));
     } catch (error) {
-      Toast.show({ content: '加载最新游记失败', position: 'bottom' });
+      Toast.show({ content: t('home.newest.failed'), position: 'bottom' });
     } finally {
       setLoading(false);
     }
@@ -125,7 +127,7 @@ export default function Home() {
           left: 0,
           right: 0,
           zIndex: 100,
-          backgroundColor: "#FFFFFF",
+          backgroundColor: "var(--color-bg-primary)",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)"
         }}
       >
@@ -138,31 +140,25 @@ export default function Home() {
               alignItems: 'center',
               gap: '8px',
               padding: '10px 16px',
-              backgroundColor: '#f8f9fa',
+              backgroundColor: 'var(--color-bg-input)',
               borderRadius: '20px',
               cursor: 'pointer',
-              border: '1px solid #e8e8e8',
+              border: '1px solid var(--color-border-deep)',
               transition: 'all 0.3s ease'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f0f1f3';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8f9fa';
-            }}
           >
-            <SearchOutline style={{ color: '#999', fontSize: '18px' }} />
-            <span style={{ color: '#999', fontSize: '14px', flex: 1 }}>
-              输入游记标题或内容
+            <SearchOutline style={{ color: 'var(--color-text-tertiary)', fontSize: '18px' }} />
+            <span style={{ color: 'var(--color-text-tertiary)', fontSize: '14px', flex: 1 }}>
+              {t('home.search.placeholder')}
             </span>
           </div>
         </div>
 
         {/* 标签页 */}
         <Tabs activeKey={activeTab} onChange={handleTabChange}>
-          <Tabs.Tab title='发现' key='recommended' />
-          <Tabs.Tab title='热门' key='trending' />
-          <Tabs.Tab title='最新' key='nearest' />
+          <Tabs.Tab title={t('home.tab.recommended')} key='recommended' />
+          <Tabs.Tab title={t('home.tab.trending')} key='trending' />
+          <Tabs.Tab title={t('home.tab.nearest')} key='nearest' />
         </Tabs>
       </div>
 
@@ -172,20 +168,22 @@ export default function Home() {
           marginTop: "100px",
           flex: 1,
           overflow: "auto",
-          backgroundColor: "#F5F5F5",
+          backgroundColor: "var(--color-bg-secondary)",
           paddingBottom: "80px",
           willChange: "scroll-position"  // 告诉浏览器优化滚动
         }}
       >
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>加载中...</div>
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
+            {t('home.loading')}
+          </div>
         ) : (
           <div
             style={{
               columnCount: 2,  // 2列瀑布流
               columnGap: "8px",
               padding: "8px",
-              backgroundColor: "#F5F5F5"
+              backgroundColor: "var(--color-bg-secondary)"
             }}
           >
             {currentNotes.map((note) => (

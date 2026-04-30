@@ -3,11 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Toast } from 'antd-mobile';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
+import { useAppContext } from '../../context/AppContext';
 
 const Login = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { t } = useAppContext();
 
   const handleSubmit = async (values) => {
     try {
@@ -20,13 +22,13 @@ const Login = () => {
       if (response.data) {
         localStorage.setItem('user', JSON.stringify(response.data));
         Toast.show({
-          content: '登录成功',
+          content: t('login.success'),
           position: 'bottom'
         });
         navigate('/mynotes');
       }
     } catch (error) {
-      const message = error.response?.data?.message || '登录失败，请检查用户名和密码';
+      const message = error.response?.data?.message || t('login.failed');
       Toast.show({
         content: message,
         position: 'bottom'
@@ -38,7 +40,7 @@ const Login = () => {
 
   return (
     <div style={{ 
-      backgroundColor: '#F5F5F5', 
+      backgroundColor: 'var(--color-bg-secondary)', 
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -49,11 +51,11 @@ const Login = () => {
       boxSizing: 'border-box'
     }}>
       <div style={{ paddingTop: '30px', paddingBottom: '20px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', margin: '0 0 8px 0' }}>
-          旅游日记
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-text-primary)', margin: '0 0 8px 0' }}>
+          {t('login.title')}
         </h1>
-        <p style={{ fontSize: '14px', color: '#666', margin: '0' }}>
-          分享你的旅行故事
+        <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0' }}>
+          {t('login.subtitle')}
         </p>
       </div>
 
@@ -70,23 +72,23 @@ const Login = () => {
               size="large"
               loading={loading}
             >
-              登录
+              {t('login.submit')}
             </Button>
           }
         >
           <Form.Item
             name="username"
-            label="用户名"
-            rules={[{ required: true, message: '请输入用户名' }]}
+            label={t('login.username')}
+            rules={[{ required: true, message: t('login.required.username') }]}
           >
             <div style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--color-bg-primary)',
               borderRadius: '12px',
-              border: '1px solid #e8e8e8',
+              border: '1px solid var(--color-border-deep)',
               overflow: 'hidden'
             }}>
               <Input 
-                placeholder="请输入用户名" 
+                placeholder={t('login.username.placeholder')}
                 clearable
                 style={{
                   padding: '12px 16px',
@@ -99,18 +101,18 @@ const Login = () => {
 
           <Form.Item
             name="password"
-            label="密码"
-            rules={[{ required: true, message: '请输入密码' }]}
+            label={t('login.password')}
+            rules={[{ required: true, message: t('login.required.password') }]}
           >
             <div style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--color-bg-primary)',
               borderRadius: '12px',
-              border: '1px solid #e8e8e8',
+              border: '1px solid var(--color-border-deep)',
               overflow: 'hidden'
             }}>
               <Input 
                 type="password" 
-                placeholder="请输入密码" 
+                placeholder={t('login.password.placeholder')}
                 clearable
                 style={{
                   padding: '12px 16px',
@@ -123,8 +125,8 @@ const Login = () => {
         </Form>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <span style={{ fontSize: '14px', color: '#666' }}>
-            没有账号？
+          <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+            {t('login.no.account')}
           </span>
           <Link 
             to="/register" 
@@ -136,7 +138,7 @@ const Login = () => {
               fontWeight: '500'
             }}
           >
-            立即注册
+            {t('login.register')}
           </Link>
         </div>
       </div>

@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Toast } from 'antd-mobile';
 import axios from 'axios';
 import API_BASE_URL from '../../config';
+import { useAppContext } from '../../context/AppContext';
 
 const Register = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState('');
+  const { t } = useAppContext();
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -32,7 +34,7 @@ const Register = () => {
       
       if (!avatarFile && !avatarPreview) {
         Toast.show({
-          content: '请选择头像',
+          content: t('register.no.avatar'),
           position: 'bottom'
         });
         setLoading(false);
@@ -56,13 +58,13 @@ const Register = () => {
 
       if (response.status === 201) {
         Toast.show({
-          content: '注册成功，请登录',
+          content: t('register.success'),
           position: 'bottom'
         });
         navigate('/login');
       }
     } catch (error) {
-      const message = error.response?.data?.message || '注册失败，请重试';
+      const message = error.response?.data?.message || t('register.failed');
       Toast.show({
         content: message,
         position: 'bottom'
@@ -74,7 +76,7 @@ const Register = () => {
 
   return (
     <div style={{
-      backgroundColor: '#F5F5F5',
+      backgroundColor: 'var(--color-bg-secondary)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -85,11 +87,11 @@ const Register = () => {
       boxSizing: 'border-box'
     }}>
       <div style={{ paddingTop: '30px', paddingBottom: '20px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', margin: '0 0 8px 0' }}>
-          旅游日记
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-text-primary)', margin: '0 0 8px 0' }}>
+          {t('register.title')}
         </h1>
-        <p style={{ fontSize: '14px', color: '#666', margin: '0' }}>
-          分享你的旅行故事
+        <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0' }}>
+          {t('register.subtitle')}
         </p>
       </div>
 
@@ -121,7 +123,7 @@ const Register = () => {
               marginTop: '8px',
               fontWeight: '500'
             }}>
-              点击更换头像
+              {t('register.avatar')}
             </div>
           </label>
         </div>
@@ -138,23 +140,23 @@ const Register = () => {
               size="large"
               loading={loading}
             >
-              注册
+              {t('register.submit')}
             </Button>
           }
         >
           <Form.Item
             name="username"
-            label="用户名"
-            rules={[{ required: true, message: '请输入用户名' }]}
+            label={t('register.username')}
+            rules={[{ required: true, message: t('register.required.username') }]}
           >
             <div style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--color-bg-primary)',
               borderRadius: '12px',
-              border: '1px solid #e8e8e8',
+              border: '1px solid var(--color-border-deep)',
               overflow: 'hidden'
             }}>
               <Input
-                placeholder="请输入用户名"
+                placeholder={t('register.username.placeholder')}
                 clearable
                 style={{
                   padding: '12px 16px',
@@ -167,18 +169,18 @@ const Register = () => {
 
           <Form.Item
             name="password"
-            label="密码"
-            rules={[{ required: true, message: '请输入密码' }]}
+            label={t('register.password')}
+            rules={[{ required: true, message: t('register.required.password') }]}
           >
             <div style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--color-bg-primary)',
               borderRadius: '12px',
-              border: '1px solid #e8e8e8',
+              border: '1px solid var(--color-border-deep)',
               overflow: 'hidden'
             }}>
               <Input
                 type="password"
-                placeholder="请输入密码"
+                placeholder={t('register.password.placeholder')}
                 clearable
                 style={{
                   padding: '12px 16px',
@@ -191,17 +193,17 @@ const Register = () => {
 
           <Form.Item
             name="nickname"
-            label="昵称"
-            rules={[{ required: true, message: '请输入昵称' }]}
+            label={t('register.nickname')}
+            rules={[{ required: true, message: t('register.required.nickname') }]}
           >
             <div style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--color-bg-primary)',
               borderRadius: '12px',
-              border: '1px solid #e8e8e8',
+              border: '1px solid var(--color-border-deep)',
               overflow: 'hidden'
             }}>
               <Input
-                placeholder="请输入昵称"
+                placeholder={t('register.nickname.placeholder')}
                 clearable
                 style={{
                   padding: '12px 16px',
@@ -214,8 +216,8 @@ const Register = () => {
         </Form>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <span style={{ fontSize: '14px', color: '#666' }}>
-            已有账号？
+          <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+            {t('register.has.account')}
           </span>
           <Link
             to="/login"
@@ -227,7 +229,7 @@ const Register = () => {
               fontWeight: '500'
             }}
           >
-            立即登录
+            {t('register.login')}
           </Link>
         </div>
       </div>
