@@ -12,7 +12,7 @@ export default function Footer(){
 
 const location = useLocation()
 const navigate = useNavigate();
-const hiddenPaths = ['/login', '/register', '/search']
+const hiddenPaths = ['/login', '/register', '/search', '/settings']
 
 // 根据当前路由确定 activeKey
 const getActiveKey = () => {

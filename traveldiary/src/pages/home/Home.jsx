@@ -31,7 +31,8 @@ export default function Home() {
         title: item.title,
         cover: item.image_url,
         username: item.user.nickname,
-        avatar: item.user.avatar_url
+        avatar: item.user.avatar_url,
+        likeCount: item.likeCount
       }));
       // 只更新对应标签页的数据
       setNotesData(prev => ({ ...prev, recommended: formattedData }));
@@ -72,6 +73,7 @@ export default function Home() {
         cover: item.image_url,
         username: item.user.nickname,
         avatar: item.user.avatar_url,
+        likeCount: item.likeCount,
         created_at: item.created_at
       }));
       setNotesData(prev => ({ ...prev, nearest: formattedData }));
@@ -199,6 +201,7 @@ export default function Home() {
                   username={note.username}
                   cover={`${API_BASE_URL}${note.cover}`}
                   avatar={`${API_BASE_URL}${note.avatar}`}
+                  likeCount={note.likeCount}
                   onClick={() => navigate(`/details/${note.id}`)}
                 />
               </div>

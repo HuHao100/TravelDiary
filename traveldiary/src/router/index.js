@@ -7,6 +7,7 @@ import Publish from '../pages/publish/Publish.jsx'
 import Layout from '../pages/Layout.jsx'
 import Details from "../pages/details/Details";
 import Search from '../pages/search/Search';
+import Settings from '../pages/settings/Settings';
 
 const routes = [
     {
@@ -40,6 +41,10 @@ const routes = [
             {
                 path:'/search',
                 element:<Search/>
+            },
+            {
+                path:'/settings',
+                element:<Settings/>
             }
         ]        
     }

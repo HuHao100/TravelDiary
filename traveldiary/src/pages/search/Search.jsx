@@ -39,7 +39,8 @@ const Search = () => {
         title: item.title,
         cover: item.image_url,
         username: item.user.nickname,
-        avatar: item.user.avatar_url
+        avatar: item.user.avatar_url,
+        likeCount: item.likeCount
       }));
 
       setResults(formattedData);
@@ -205,6 +206,7 @@ const Search = () => {
                 username={note.username}
                 cover={`${API_BASE_URL}${note.cover}`}
                 avatar={`${API_BASE_URL}${note.avatar}`}
+                likeCount={note.likeCount}
                 onClick={() => navigate(`/details/${note.id}`)}
               />
             ))}
